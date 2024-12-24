@@ -16,8 +16,14 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+	int sysreturned = system(cmd);
 
-    return true;
+	if( sysreturned != -1 )
+		return true;
+	else
+		return false;
+
+//    return true;
 }
 
 /**
@@ -58,10 +64,49 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    fflush(stdout);
+    int pid = fork();
 
-    va_end(args);
 
-    return true;
+    if(pid != -1){
+
+	    if( pid == 0 ){
+		    
+		    //calling execv in child
+		    execv(command[0], command);
+
+    		    perror("Exec failed");
+		    return false;
+
+	    }
+	    else {
+    		    int status;
+
+
+		    //calling wait in parent
+		    wait(&status);
+
+		    //check if the child terminated normally
+		    if(WIFEXITED(status)){
+			    printf("Child terminated normally exit status : %d\n", WEXITSTATUS(status));
+			    return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+
+		    }
+		    else{
+			    printf("Child didnt terminate norally\n");
+			    return false;
+		    }
+	    }
+	
+    }
+    else{
+	    printf("Error executing fork %s\n", strerror(errno));
+            va_end(args);
+	    return false;
+    }
+//va_end(args);
+//return true;
+
 }
 
 /**
@@ -91,9 +136,67 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   redirect standard out to a file specified by outputfile.
  *   The rest of the behaviour is same as do_exec()
  *
-*/
+*/  
 
-    va_end(args);
+    fflush(stdout);
+    int pid = fork();
+    int status;
 
-    return true;
+    if(pid != -1){
+
+	    if( pid == 0 ){
+   		 int fd = open(outputfile, O_WRONLY | O_CREAT | O_TRUNC, 0644 );
+    		if ( fd == -1 ){
+
+	    		perror("open failed");
+    	    		va_end(args);
+	    		return false;
+    		}
+
+    		if( dup2(fd,1) == -1 ){
+	    
+	    		perror("dup failed");
+    	    		va_end(args);
+	    		return false;
+    		}
+    
+   		 close(fd);
+		    
+		    //calling execv in child
+		    execv(command[0], command);
+
+		    printf("Error calling execv %s\n", strerror(errno));
+    		    va_end(args);
+		    _exit(EXIT_FAILURE);
+
+	    }
+	    else {
+
+		    //calling wait in parent
+		    wait(&status);
+
+		    //check if the child terminated normally
+		    if(WIFEXITED(status)){
+			    printf("Child terminated normally exit status : %d\n", WEXITSTATUS(status));
+			    return WIFEXITED(status) && (WEXITSTATUS(status)==0);
+		    }
+		    else{
+			    printf("Child didnt terminate norally\n");
+			    va_end(args);
+			    return false;
+		    }
+
+	    }
+	
+    }
+    else{
+	    printf("Error executing fork %s\n", strerror(errno));
+            va_end(args);
+	    return false;
+    }
+
+
+//    va_end(args);
+
+//    return true;
 }
