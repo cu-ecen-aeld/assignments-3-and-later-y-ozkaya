@@ -82,9 +82,8 @@ bool do_exec(int count, ...)
 	    execv(command[0], command);
 
             perror("execv");
-	    //va_end(args);
-	    abort();
-	    //return false;
+	    va_end(args);
+	    return false;
     }
     else if(pid > 0) {
  	    int status;
@@ -98,12 +97,22 @@ bool do_exec(int count, ...)
 		    va_end(args);
 	            return false;
 	    }
-	    va_end(args);
-	    return WIFEXITED(status) &&( WEXITSTATUS(status) == 0);
+	    //va_end(args);
+            if (WIFEXITED(status)) { 
+                int rc = WEXITSTATUS(status);
+                printf("Child exited, rc=%d\n", rc); 
+                return rc == 0 ? true : false;
+            } else if (WIFSIGNALED(status)) { printf("Child killed by signal %d\n", WTERMSIG(status));return false; 
+            } else if (WIFSTOPPED(status)) { printf("Child stopped by signal %d\n", WSTOPSIG(status));return false; 
+            } else if (WIFCONTINUED(status)) { printf("Child continued\n"); return false;}	    
+	    //return WIFEXITED(status) &&( WEXITSTATUS(status) == 0);
+	    return false;
 	
     }
-va_end(args);
-return false;
+    else
+	    return false;
+//va_end(args);
+//return true;
 
 }
 
@@ -166,13 +175,11 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     	    }
 
     	    //calling execv in child
-	    
 	    execv(command[0], command);
 
             perror("execv");
-	    //va_end(args);
-	    abort();
-	    //return false;
+	    va_end(args);
+	    return false;
     }
     else {
  	    int status;
@@ -192,7 +199,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 	
     }
 
-    va_end(args);
+//    va_end(args);
 
-    return true;
+//    return true;
 }
