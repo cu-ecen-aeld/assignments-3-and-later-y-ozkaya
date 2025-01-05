@@ -6,7 +6,7 @@ writer.o: writer.c
 	$(CROSS_COMPILE)gcc -c writer.c -o writer.o
 
 clean:
-	rm $(wildcard *.o) 
+	rm -f writer.o writer 
 
 
 
