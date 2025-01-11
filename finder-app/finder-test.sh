@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Tester script for assignment 1 and assignment 2
 # Author: Siddhant Jajoo
 
@@ -58,10 +58,10 @@ echo "Removing the old writer utility and compiling as a native application"
 for i in $( seq 1 $NUMFILES)
 do
 #	bash writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
-OUTPUTSTRING=$(bash finder.sh "$WRITEDIR" "$WRITESTR")
+OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 echo ${OUTPUTSTRING} > /tmp/assignment4-result.txt
 # remove temporary directories
 rm -rf /tmp/aeld-data

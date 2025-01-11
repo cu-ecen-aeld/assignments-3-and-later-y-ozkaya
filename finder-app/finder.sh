@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #script to search for specified file under the directory and number of lines having the specified search string
 
